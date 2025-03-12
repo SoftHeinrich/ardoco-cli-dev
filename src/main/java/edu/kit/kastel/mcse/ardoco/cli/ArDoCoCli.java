@@ -66,10 +66,10 @@ public class ArDoCoCli {
             logger.error("No output directory specified.");
             return;
         }
-        if (cmd.hasOption(CMD_EVAL)) {
-            doEval(cmd);
-            return;
-        }
+//        if (cmd.hasOption(CMD_EVAL)) {
+//            doEval(cmd);
+//            return;
+//        }
 
         if (cmd.hasOption(CMD_TASK)) {
             String task = cmd.getOptionValue(CMD_TASK);
@@ -125,28 +125,28 @@ public class ArDoCoCli {
         }
     }
 
-    private static void doEval(CommandLine cmd) {
-        logger.info("Starting evaluation-mode: Processing the benchmark projects to create the csv with TLR-results.");
-
-        for (var project : CodeProject.values()) {
-            String name = project.getCodeProject().name();
-            File out = null;
-            File sad = null;
-            File sam = null;
-            File code = null;
-            try {
-                out = ensureDir(cmd.getOptionValue(CMD_OUT));
-                sad = project.getCodeProject().getTextFile();
-                sam = project.getCodeProject().getModelFile();
-                code = ensureFile(project.getCodeModelDirectory());
-            } catch (IOException e) {
-                logger.error(ERROR_READING_FILES, e);
-            }
-            var runner = new ArDoCoForSadSamCodeTraceabilityLinkRecovery(name);
-            runner.setUp(sad, sam, ArchitectureModelType.PCM, code, new TreeMap<>(), out);
-            runner.run();
-        }
-    }
+//    private static void doEval(CommandLine cmd) {
+//        logger.info("Starting evaluation-mode: Processing the benchmark projects to create the csv with TLR-results.");
+//
+//        for (var project : CodeProject.values()) {
+//            String name = project.getCodeProject().name();
+//            File out = null;
+//            File sad = null;
+//            File sam = null;
+//            File code = null;
+//            try {
+//                out = ensureDir(cmd.getOptionValue(CMD_OUT));
+//                sad = project.getCodeProject().getTextFile();
+//                sam = project.getCodeProject().getModelFile();
+//                code = ensureFile(project.getCodeModelDirectory());
+//            } catch (IOException e) {
+//                logger.error(ERROR_READING_FILES, e);
+//            }
+//            var runner = new ArDoCoForSadSamCodeTraceabilityLinkRecovery(name);
+//            runner.setUp(sad, sam, ArchitectureModelType.PCM, code, new TreeMap<>(), out);
+//            runner.run();
+//        }
+//    }
 
     private static void doSadSam(CommandLine cmd) {
         logger.info("Starting SAD-SAM.");
