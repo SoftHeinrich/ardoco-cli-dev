@@ -14,18 +14,19 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 import edu.kit.kastel.mcse.ardoco.core.api.models.ArchitectureModelType;
-import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSadSamTraceabilityLinkRecovery;
+import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSadSamCodeTraceabilityLinkRecovery;
 import edu.kit.kastel.mcse.ardoco.cli.plugin.core.TaskPlugin;
 
 /**
- * Plugin for architecture doc to architecture model traceability link recovery.
+ * Plugin for SAD-CODE traceability link recovery.
  */
-public class SadSamTaskPlugin extends TaskPlugin {
-    private static final String PREFIX = "SadSam";
-    private static final String TASK_NAME = "sad-sam";
+public class SadCodeTaskPlugin extends TaskPlugin {
+    private static final String PREFIX = "sdc";
+    private static final String TASK_NAME = "sad-code";
 
     private static final String CMD_SAD = PREFIX + "-d";
     private static final String CMD_MODEL = PREFIX + "-m";
+    private static final String CMD_CODE = PREFIX + "-c";
 
     @Override
     public String getPrefix() {
@@ -51,6 +52,11 @@ public class SadSamTaskPlugin extends TaskPlugin {
         opt.setRequired(true);
         options.add(opt);
 
+        opt = new Option(CMD_CODE, "code", true, "Path to the code");
+        opt.setType(String.class);
+        opt.setRequired(true);
+        options.add(opt);
+
         opt = new Option("n", "name", true, "Name of the project that should be analyzed");
         opt.setType(String.class);
         opt.setRequired(true);
@@ -61,26 +67,48 @@ public class SadSamTaskPlugin extends TaskPlugin {
 
 
     @Override
+    //TODO: Use add -transitive option to indicate whether to use transarc or ardocode
     public void execute(CommandLine cmd, File outputDir) {
-        logger.info("Starting SAD-SAM traceability link recovery task.");
+        logger.info("Starting SAD-CODE traceability link recovery task.");
 
         String name = cmd.getOptionValue("n");
         File sad = null;
         File sam = null;
+        File code = null;
 
         try {
             sad = ensureFile(cmd.getOptionValue(CMD_SAD));
             sam = ensureFile(cmd.getOptionValue(CMD_MODEL));
+            code = getCodeDirectory(cmd.getOptionValue(CMD_CODE));
         } catch (IOException e) {
             logger.error(ERROR_READING_FILES, e);
             return;
         }
 
-        var runner = new ArDoCoForSadSamTraceabilityLinkRecovery(name);
-        runner.setUp(sad, sam, ArchitectureModelType.PCM, new TreeMap<>(), outputDir);
+        var runner = new ArDoCoForSadSamCodeTraceabilityLinkRecovery(name);
+        runner.setUp(sad, sam, ArchitectureModelType.PCM, code, new TreeMap<>(), outputDir);
         runner.run();
 
-        logger.info("SAD-SAM task completed.");
+        logger.info("SAD-CODE task completed.");
+    }
+
+    /**
+     * Gets the code directory, handling both file and directory inputs.
+     * @param path the path to the code
+     * @return the code directory
+     * @throws IOException if the directory doesn't exist
+     */
+    private File getCodeDirectory(String path) throws IOException {
+        try {
+            return ensureFile(path);
+        } catch (IOException e) {
+            var file = new File(path);
+            if (file.isDirectory() && file.exists()) {
+                return file;
+            } else {
+                throw new IOException(ERROR_FILE_NOT_EXISTING + path);
+            }
+        }
     }
 
     @Override
@@ -88,6 +116,7 @@ public class SadSamTaskPlugin extends TaskPlugin {
         Map<String, String> descriptions = new HashMap<>();
         descriptions.put(CMD_SAD, "Path to the documentation (SAD)");
         descriptions.put(CMD_MODEL, "Path to the model (SAM)");
+        descriptions.put(CMD_CODE, "Path to the code");
         return descriptions;
     }
 }

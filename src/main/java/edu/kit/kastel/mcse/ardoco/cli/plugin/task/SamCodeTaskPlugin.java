@@ -19,7 +19,7 @@ import edu.kit.kastel.mcse.ardoco.tlr.execution.ArDoCoForSamCodeTraceabilityLink
 import edu.kit.kastel.mcse.ardoco.cli.plugin.core.TaskPlugin;
 
 /**
- * Plugin for SAM-CODE traceability link recovery.
+ * Plugin for architecture model to code traceability link recovery.
  */
 public class SamCodeTaskPlugin extends TaskPlugin {
     private static final String PREFIX = "SamCode";
